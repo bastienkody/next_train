@@ -1,0 +1,26 @@
+Get a token on : https://prim.iledefrance-mobilites.fr/fr/mon-jeton-api
+Save it somewhere.
+
+Find the url to request in here : https://prim.iledefrance-mobilites.fr/fr/donnees-dynamiques/idfm-ivtr-requete_unitaire
+It differs from "https://api-iv.iledefrance-mobilites.fr/lines/v2/line:{}/stops/stop_area:{}/realTime", that i can't make it work. 
+
+Find the Line code ref and the area stop code (prefer area zone than stop point). Can be found here : 
+line : https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/information/?disjunctive.transportmode&disjunctive.transportsubmode&disjunctive.operatorname&disjunctive.networkname
+stops : https://data.iledefrance-mobilites.fr/explore/dataset/arrets/table
+
+The format is special : 
+"STIF:StopArea:SP:474151:" for chatelet area
+"STIF:Line::C01743:" stands for RER_B
+
+Attention : colons are replaced in the request url by "%3A" (% + ascii code of colon in hexa). 
+
+The request url for all next RER_B in Chatelet is :
+URL_API = https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF%3AStopArea%3ASP%3A474151%3A&LineRef=STIF%3ALine%3A%3AC01743%3A
+
+Can be done w/ python n request, or with curl with -H option for header info :
+curl -X 'GET' $URL_API -H "Accept: application/json" -H "'api key': 'INSERT API TOKEN' "
+
+For informations messaes (ie pertubations) of RER_B (https://prim.iledefrance-mobilites.fr/fr/donnees-statiques/informations-trafic)
+url = https://prim.iledefrance-mobilites.fr/marketplace/general-message?LineRef=STIF%3ALine%3A%3AC01743%3A
+
+There is another IDFM API with better doc "https://doc.navitia.io/#getting-started"

@@ -10,7 +10,7 @@ line="C01743"
 stop="474151"
 stop="45102"
 #stop="451"
-terminus=("mitry" "charles")
+terminus=("mitry")
 
 header="apikey: $token"
 url="https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?\
@@ -57,8 +57,8 @@ for res in "${RES[@]}";
 do
 	min=$(echo $res | cut -d':' -f2)
 	hours=$(( $(echo $res | cut -d':' -f1) + $GMT ))
-	#[[ $hours -gt 24 ]] && hours=$(($hours - 24))
-	#res=$(echo $hours`echo :``echo $res | cut -d':' -f2`)
+	[[ $hours -gt 24 ]] && hours=$(($hours - 24))
+	res=$(echo $hours`echo :``echo $res | cut -d':' -f2`)
 	delta=$(( (($hours - $ct_hours) * 60) + $min - $ct_min ))
 	echo "next at:$res (in $delta min)"
 done

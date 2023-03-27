@@ -63,6 +63,7 @@ do
 	echo "next at:$res (in $delta min)"
 done
 
+#  Corriger les trains retardes (relative time negatif ...)
 # A - gerer plusieurs terminus (ex RER_C Lenny) [EN COURS - pb saut de ligne pour plusieurs terminus]
 # B - recuperer les zones d'arrets ; filtrer les metro + rail (egrep 'metro|rail')
 # C - recup les lignes (rer + metro)

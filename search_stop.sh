@@ -4,11 +4,11 @@ stop_file=$(cat $stop_file | sed s'/;/ (/' |  sed s'/;/ ; /g' | sed s'/.$/)/g' |
 
 function get_stop() 
 {
-	echo -n "\033[4mDeparture stop:\033[m "
+	echo -n "Departure stop \033[3m(code or name)\033[m: "
 	read input
 	input=$(echo $input | tr "ÄäÂâÀà" "a" |tr "ÈèÉéËëÊê" "e" | tr "ÏïÎî" "i" | tr "ÖöÔô" "o" | tr "ÜüÛû" "u" | tr "Çç" "c" | tr "[A-Z]" "[a-z]")
 	res=$(echo $stop_file | grep "$input")
-	[[ $(echo $res | wc -l) -eq 1 && $(echo $res | wc -c) -gt 2 ]] && stop=`echo $res | cut -d' ' -f2` && return
+	[[ $(echo $res | wc -l) -eq 1 && $(echo $res | wc -c) -gt 2 ]] && stop=`echo $res | cut -d' ' -f2` && echo "\033[2mStop selected: $res\033[m" && return
 	[[ $(echo $res | wc -c) -eq 1 ]] && echo "No entry for $input (CTRL+C to quit)" && get_stop
 	[[ $(echo $res | wc -l) -gt 1 ]] && echo "\n\033[1mMultiple entries found for \"$input\" (be more precise):\033[m\n$(echo $res)\n" && get_stop
 } 
@@ -24,16 +24,24 @@ line_clean=$(cat $line_file | sed s'/;/ (/' | sed s'/;/ /' | sed s'/$/)/g' | sed
 
 function get_line() 
 {
-	echo -n "\033[4mLine \033[3m(ie. metro 3, rer a, tram t3a):\033[m "
+	echo -n "Line \033[3m(ie. metro 3, rer a, tram t3a)\033[m: "
 	read input
 	input=$(echo $input | tr "ÄäÂâÀà" "a" |tr "ÈèÉéËëÊê" "e" | tr "ÏïÎî" "i" | tr "ÖöÔô" "o" | tr "ÜüÛû" "u" | tr "Çç" "c" | tr "[A-Z]" "[a-z]" | tr " " ".")
 	res=$(echo $line_clean | grep -i "$input")
-	[[ $(echo $res | wc -l) -eq 1 && $(echo $res | wc -c) -gt 2 ]] && line=`echo $res | cut -d';' -f1` && return
+	[[ $(echo $res | wc -l) -eq 1 && $(echo $res | wc -c) -gt 2 ]] && line=`echo $res | cut -d' ' -f2` && echo "\033[2mLine selected: $res\033[m" && return
 	[[ $(echo $res | wc -c) -eq 1 ]] && echo "No entry for $input (CTRL+C to quit)" && get_line
 	[[ $(echo $res | wc -l) -gt 1 ]] && echo "\n\033[1mMultiple entries found for \"$input\" (be more precise):\033[m\n$(echo $res)\n" && get_line
-} 
+}
 
 # get_line as main:
 #set line
 #get_line 
 #echo $line
+
+function get_terminus
+{
+	echo -n "\033[4mTerminus \033[3m(usee quotes ; you can specify several. ie:\"Mairie d'Ivry\" \"Villejuif\"):\033[m "
+	input=()
+	read input
+	echo $input[0]
+}

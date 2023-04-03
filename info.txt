@@ -6,12 +6,14 @@ It differs from "https://api-iv.iledefrance-mobilites.fr/lines/v2/line:{}/stops/
 Line code ref and the Area stop code (prefer area zone than stop point). Can be found here : 
 line : https://data.iledefrance-mobilites.fr/explore/dataset/referentiel-des-lignes/information/?disjunctive.transportmode&disjunctive.transportsubmode&disjunctive.operatorname&disjunctive.networkname
 stops : https://data.iledefrance-mobilites.fr/explore/dataset/arrets/table
+Line and stops are refered throught their code (4-5 digits) which are (the only) endpoints for the request.
+If unrecognized or cannot match (stop code is not a stop of the line) : err 400.
+Terminuses are not endpoints. They are found in the response.
 
 format : 
 "STIF:StopArea:SP:474151:" for chatelet area
 "STIF:Line::C01743:" stands for RER_B
 
-can't handle more arguments than line + departure stop. 
 response in json with all departures in every directions
 parse with terminus
 

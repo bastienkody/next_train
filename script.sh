@@ -1,22 +1,22 @@
-#!/bin/sh
+#!/bin/zsh
 
-# research infos
+# help/usage mode
+[[ $1 =~ "-h|-help|-usage|--help|--usage" ]] && echo "\033[1mPRINT USAGE\033[0m" && exit 0
+# includes (only needed for interactive mode)
+[[ $1 == "-i" ]] && source search_stop.sh
+
+# token infos
+token_path=~/.token_idfm
+token=$(cat $token_path 2>/dev/null)
+[[ $(echo $token | wc -c) -gt 1 ]] || {echo "token empty" && exit 45}
+
+# research infos (mandatory for non interactive use)
 line="C01743"
 stop="474151"
 terminus=("mitry")
 
-# help/usage mode
-[[ $1 =~ "-h|-help|-usage|--help|--usage" ]] && echo "\033[1mPRINT USAGE\033[0m" && exit 0
-
-# includes (only needed for interactive mode)
-[[ $1 == "-i" ]] && source search_stop.sh
-
-# interactive mode (reset line stop and terminus)
-[[ $1 == "-i" ]] && echo "\033[1mInterative mode\033[0m" && get_stop
-
-# token checker
-token=$(cat ~/.token_idfm 2>/dev/null)
-[[ $(echo $token | wc -c) -gt 1 ]] || {echo "token empty" && exit 45}
+# interactive mode (reset line stop)
+[[ $1 == "-i" ]] && echo "\033[1;4mInteractive mode\033[0m" && get_stop && get_line
 
 # requete api idfm
 header="apikey: $token"
@@ -25,14 +25,31 @@ MonitoringRef=STIF%3AStopArea%3ASP%3A$stop%3A&LineRef=STIF%3ALine%3A%3A$line%3A"
 req=$(curl -s -i -X 'GET' -H $header $url)
 #echo $req
 
-# check code (200 ok, 500||503 api ko, 400 -> input err. MonitoringRef:stop || LineRef:line)
-code=$(echo $req | grep -m1 'HTTP' | egrep -o '[0-9]{3}')
-echo $code | egrep -q '500|503' && echo "idfm ko" && exit 46
-err=$(echo $code | egrep -q '400' && echo $req | grep -o "\"ErrorText\":\".*\"," | cut -d':' -f2 | tr -d "\",")
-[[ `echo $err | wc -c` -gt 0 ]] && echo $err | grep -q "MonitoringRef" && echo "Stop code is not recognized" && exit 47
-[[ `echo $err | wc -c` -gt 0 ]] && echo $err | grep -q "LineRef" && echo "Line code is not recognized" && exit 48
+# Error msg
+token_err="Error 401 : Invalid authentication credentials (bad token for Idfm API)"
+i_e="Input error :"
+sl_err="$i_e Stop code $stop is not a stop of line $line"
+stop_err="$i_e Stop code $stop is not recognized"
+line_err="$i_e Line code $line is not recognized"
 
-for term in "${terminus[@]}";
+# check code (401 token, 200 ok, 500||503 api ko, 400 input err)
+code=$(echo $req | grep -m1 'HTTP' | egrep -o '[0-9]{3}')
+echo $code | egrep -q '401' && echo $token_err && exit 45
+echo $code | egrep -q '500|503' && echo "IDFM API KO" && exit 46
+err=$(echo $code | egrep -q '400' && echo $req | grep -o "\"ErrorText\":\".*\"," | cut -d':' -f2 | tr -d "\",")
+[[ `echo $err | wc -c` -gt 0 ]] && echo $err | grep -q "MonitoringRef/LineRef" && echo $sl_err && exit 47
+[[ `echo $err | wc -c` -gt 0 ]] && echo $err | grep -q "MonitoringRef" && echo $stop_err && exit 47
+[[ `echo $err | wc -c` -gt 0 ]] && echo $err | grep -q "LineRef" && echo $line_err && exit 48
+
+# Get terminuses from req (interactive mode)
+test=()
+test=$(echo $req | tr "," "\n" | grep -i destinationname | sort | uniq | egrep -o "\"value\":\".*}]$" | cut -d':' -f2 | egrep -o "\".*\"" | tr -d "\"" | tr "ÄäÂâÀà" "a" |tr "ÈèÉéËëÊê" "e" | tr "ÏïÎî" "i" | tr "ÖöÔô" "o" | tr "ÜüÛû" "u" | tr "Çç" "c" | tr "[A-Z]" "[a-z]")
+echo $test[@]
+#exit 42
+
+#possible_terminus=$(   )
+
+for term in "${terminus[@]}" ;
 do
 	next_times+=$(echo $req | tr "{" "\n" | grep -i $term | tr "," "\n" | grep -i departuretime | egrep -o "[0-9]{2}:[0-9]{2}")$(echo " ")
 done

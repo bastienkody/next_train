@@ -69,3 +69,17 @@ function retrieve_codenline_names()
 	stop_name=$(cat $stop_file | grep $stop | tr "[a-z]" "[A-Z]")
 	stop_name=$(echo $stop_name | cut -d';' -f2)
 }
+
+
+function print_usage()
+{
+	echo "NAME"
+	echo "\tNEXT TRAIN Application - retrieves upcoming train runs infos"
+
+	echo "DESCRIPTION"
+	echo "Retrieve upcoming train runs infos from requesting IDFM (Paris suburban public transport) API."
+	echo "The application works for metro, tramway, rer/ter and transilien."
+	echo "Returns next runs for a specific line at a specific stop, and info/pertubations about the line."
+ 	echo "It is not a city mapper, it does not find routes"
+	echo "SYNOPSYS"
+}

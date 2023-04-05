@@ -2,7 +2,8 @@
 source utils.sh
 
 # help/usage mode
-[[ $1 =~ "^(-i|-h|-help|-usage|--help|--usage)$" ]] && echo "\033[1mPRINT USAGE\033[0m" && exit 0
+[[ $1 =~ "^(-h|-help|-usage|--help|--usage)$" ]] && echo "\033[1mPRINT USAGE\033[0m" && exit 0
+
 
 # token infos
 token_path=~/.token_idfm
@@ -18,15 +19,23 @@ terminus=("robinson" "mitry" "charles")
 [[ $1 == "-i" ]] && {echo "\033[1;4;30;47mINTERACTIVE MODE\033[0m" ; get_stop ; get_line}
 
 # unwanted argument
-[[ $# -ge 1 ]] && { [[ $1 =~ "^(-i|-h|-help|-usage|--help|--usage)$" ]] || echo "Error : argument \"$1\" unrecognized" && exit 44 }
+[[ $# -ge 1 ]] && { [[ $1 =~ "^(-i|-h|-help|-usage|--help|--usage)$" ]] || {echo "Error : argument \"$1\" unrecognized" && exit 44 }}
 
 
-# requete api idfm
+# requete api idfm PROCHAINS PASSAGES
 header="apikey: $token"
 url="https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?\
 MonitoringRef=STIF%3AStopArea%3ASP%3A$stop%3A&LineRef=STIF%3ALine%3A%3A$line%3A"
 req=$(curl -s -i -X 'GET' -H $header $url)
 #echo $req | tr "," "\n"
+
+# requete INFORMATIONS/PERTUBATIONS
+header="apikey: $token"
+url="https://prim.iledefrance-mobilites.fr/marketplace/general-message?\
+LineRef=STIF%3ALine%3A%3AC01743%3A"
+req_pertub=$(curl -s -i -X 'GET' -H $header $url)
+#echo $req_pertub | tr "," "\n"
+echo $req_pertub | egrep -o "\"MessageText\":\{\"value\":\"Du 22/04 au 23/04\""
 
 
 # check code (401 token, 200 ok, 500||503 api ko, 400 input err)
